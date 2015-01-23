@@ -3,11 +3,39 @@
 class Robot: public IterativeRobot
 {
 private:
+	//initialize variables
+		//driver station
 	LiveWindow *lw;
+	Joystick *m_leftStick;
+	Joystick *m_rightStick;
+	Joystick *m_gamepad;
+
+	// motors
+		//drivetrain
+	CANTalon *m_leftFront;
+	CANTalon *m_rightFront;
+	CANTalon *m_leftBack;
+	CANTalon *m_rightBack;
+	RobotDrive *m_robotDrive;
+
+	//pneumatics
+	//shifter
+	Solenoid *m_shifterUp;
+	Solenoid *m_shifterDown;
+
+	//teleop variables
+	Timer *lastShift;
+
+	//ints and floats
+	int shiftValue;
+	float leftStickValue;
+	float rightStickValue;
+
 
 	void RobotInit()
 	{
 		lw = LiveWindow::GetInstance();
+
 	}
 
 	void AutonomousInit()
@@ -23,6 +51,7 @@ private:
 	void TeleopInit()
 	{
 
+
 	}
 
 	void TeleopPeriodic()
@@ -34,6 +63,31 @@ private:
 	{
 		lw->Run();
 	}
-};
+	void TeleopDrive()
+	{
+		leftStickValue = m_leftStick->GetY();
+		rightStickValue = m_rightStick->GetY();
+		m_robotDrive->TankDrive(leftStickValue, rightStickValue);
+	}
 
+	void Shift()
+	{
+		if(m_leftStick->GetTrigger() == 1 && m_rightStick->GetTrigger() == 1 && shiftValue == 0 && lastShift->Get() > 0.3 )
+		{
+			m_shifterUp->Set(true);
+			m_shifterDown->Set(false);
+			shiftValue = 1;
+			lastShift->Reset();
+			printf("Shifter up set to true \n");
+		}
+		else if(m_leftStick->GetTrigger() == 1 && m_rightStick->GetTrigger() == 1 && shiftValue == 1 && lastShift->Get() > 0.3 )
+		{
+			m_shifterUp->Set(false);
+			m_shifterDown->Set(true);
+			shiftValue = 0;
+			lastShift->Reset();
+			printf("Shifter down set to true \n");
+		}
+	}
+};
 START_ROBOT_CLASS(Robot);
