@@ -51,9 +51,7 @@ private:
 	void TeleopInit()
 	{
 
-
 	}
-
 	void TeleopPeriodic()
 	{
 
@@ -78,7 +76,6 @@ private:
 			m_shifterDown->Set(false);
 			shiftValue = 1;
 			lastShift->Reset();
-			printf("Shifter up set to true \n");
 		}
 		else if(m_leftStick->GetTrigger() == 1 && m_rightStick->GetTrigger() == 1 && shiftValue == 1 && lastShift->Get() > 0.3 )
 		{
@@ -86,7 +83,6 @@ private:
 			m_shifterDown->Set(true);
 			shiftValue = 0;
 			lastShift->Reset();
-			printf("Shifter down set to true \n");
 		}
 	}
 };
