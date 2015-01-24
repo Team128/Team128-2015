@@ -17,6 +17,7 @@ private:
 	CANTalon *m_leftBack;
 	CANTalon *m_rightBack;
 	RobotDrive *m_robotDrive;
+	CANTalon *m_screw;
 
 	//pneumatics
 	//shifter
@@ -35,6 +36,18 @@ private:
 	void RobotInit()
 	{
 		lw = LiveWindow::GetInstance();
+		m_leftStick = new Joystick(0);
+		m_rightStick = new Joystick(0);
+		m_gamepad = new Joystick(0);
+		m_leftFront = new CANTalon(0);
+		m_rightFront = new CANTalon(0);
+		m_leftBack = new CANTalon(0);
+		m_rightBack = new CANTalon(0);
+		m_robotDrive = new RobotDrive(0);
+		m_screw = new CANTalon(0);
+		m_shifterUp = new Solenoid(0);
+		m_shifterDown = new Solenoid(0);
+		lastShift = new Timer(0);
 
 	}
 
@@ -50,7 +63,7 @@ private:
 
 	void TeleopInit()
 	{
-
+		shiftValue = 0;
 	}
 	void TeleopPeriodic()
 	{
@@ -86,4 +99,5 @@ private:
 		}
 	}
 };
+
 START_ROBOT_CLASS(Robot);
