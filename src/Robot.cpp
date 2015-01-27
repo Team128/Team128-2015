@@ -27,8 +27,13 @@ private:
 	//teleop variables
 	Timer *lastShift;
 
+	//manipulator variables
+	Solenoid *m_armOpen;
+	Solenoid *m_armClose;
+
 	//ints and floats
 	int shiftValue;
+	int armValue;
 	float leftStickValue;
 	float rightStickValue;
 
@@ -48,6 +53,8 @@ private:
 		m_shifterUp = new Solenoid(0);
 		m_shifterDown = new Solenoid(0);
 		lastShift = new Timer();
+		m_armOpen = new Solenoid(0);
+		m_armClose = new Solenoid (0);
 
 	}
 
@@ -98,6 +105,27 @@ private:
 			lastShift->Reset();
 		}
 	}
+
+	void ManipulatorInit()
+	{
+		armValue = 0;
+	}
+	void Manipulator()
+	{
+		if(m_gamepad->GetRawButton(1) == 1 && armValue == 0)
+		{
+			m_armOpen->Set(true);
+			m_armClose->Set(false);
+			armValue = 1;
+		}
+		else if(m_gamepad->GetRawButton(1) == 1 && armValue == 1)
+		{
+			m_armOpen->Set(false);
+			m_armClose->Set(true);
+			armValue = 0;
+		}
+	}
+
 };
 
 START_ROBOT_CLASS(Robot);
