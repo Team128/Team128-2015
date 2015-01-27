@@ -43,7 +43,7 @@ private:
 		m_rightFront = new CANTalon(0);
 		m_leftBack = new CANTalon(0);
 		m_rightBack = new CANTalon(0);
-		m_robotDrive = new RobotDrive(m_leftFront, m_leftBack, m_rightFront, m_rightBack);
+		m_robotDrive = new RobotDrive(m_leftFront,m_rightFront,m_leftBack,m_rightBack);
 		m_screw = new CANTalon(0);
 		m_shifterUp = new Solenoid(0);
 		m_shifterDown = new Solenoid(0);
