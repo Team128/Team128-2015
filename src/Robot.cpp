@@ -9,6 +9,7 @@ private:
 	Joystick *m_leftStick;
 	Joystick *m_rightStick;
 	Joystick *m_gamepad;
+	SmartDashboard *smart;
 
 	// motors
 		//drivetrain
@@ -17,38 +18,56 @@ private:
 	CANTalon *m_leftBack;
 	CANTalon *m_rightBack;
 	RobotDrive *m_robotDrive;
+		//lift
 	CANTalon *m_screw;
 
 	//pneumatics
-	//shifter
+		//shifter
 	Solenoid *m_shifterUp;
 	Solenoid *m_shifterDown;
 
-	//teleop variables
+	//timers
 	Timer *lastShift;
+	Timer *liftToBoxHeight;
 
-	//ints and floats
+	//sensors
+	DigitalInput *liftLimitSwitch;
+
+	//ints, floats, and bools
 	int shiftValue;
 	float leftStickValue;
 	float rightStickValue;
+	bool bikiniBottom;					//Lift is at the bottom
 
 
 	void RobotInit()
 	{
+		//driverstation
 		lw = LiveWindow::GetInstance();
 		m_leftStick = new Joystick(0);
 		m_rightStick = new Joystick(0);
 		m_gamepad = new Joystick(0);
+		smart = new SmartDashboard();
+
+		//drivetrain
 		m_leftFront = new CANTalon(0);
 		m_rightFront = new CANTalon(0);
 		m_leftBack = new CANTalon(0);
 		m_rightBack = new CANTalon(0);
-		m_robotDrive = new RobotDrive(m_leftFront,m_rightFront,m_leftBack,m_rightBack);
-		m_screw = new CANTalon(0);
 		m_shifterUp = new Solenoid(0);
 		m_shifterDown = new Solenoid(0);
-		lastShift = new Timer();
+		m_robotDrive = new RobotDrive(m_leftFront,m_rightFront,m_leftBack,m_rightBack);
 
+		//lift
+		m_screw = new CANTalon(0);
+
+		//timers
+		lastShift = new Timer();
+		liftToBoxHeight = new Timer();
+
+		//sensors
+		liftLimitSwitch = new DigitalInput(0);
+		SmartDashboard::init();
 	}
 
 	void AutonomousInit()
@@ -67,12 +86,17 @@ private:
 	}
 	void TeleopPeriodic()
 	{
-
+		TeleopDrive();
+		Shift();
+		Lift();
 	}
 
 	void TestPeriodic()
 	{
 		lw->Run();
+		TeleopDrive();
+		Shift();
+		Lift();
 	}
 	void TeleopDrive()
 	{
@@ -96,6 +120,33 @@ private:
 			m_shifterDown->Set(true);
 			shiftValue = 0;
 			lastShift->Reset();
+		}
+	}
+	void Lift()
+	{
+		m_screw->Set(m_gamepad->GetZ());		//"Set" may be changed for CAN
+
+		if(m_gamepad->GetRawButton(12))
+		{
+			while(liftLimitSwitch->Get())
+			{
+				m_screw->Set(-0.7);
+			}
+			bikiniBottom = true;
+			m_screw->Set(0.0);
+			smart->PutString("Lift status", "At bottom");
+		}
+		if(m_gamepad->GetRawButton(0))
+		{
+			liftToBoxHeight->Start();
+
+			while(liftToBoxHeight->Get() < 1.05)
+			{
+				m_screw->Set(0.7);
+			}
+			m_screw->Set(0.0);
+			liftToBoxHeight->Reset();
+			smart->PutString("Lift status", "At box height");
 		}
 	}
 };
