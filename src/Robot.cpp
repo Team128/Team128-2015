@@ -29,15 +29,19 @@ private:
 	//timers
 	Timer *lastShift;
 	Timer *liftToBoxHeight;
+	Timer *autonLiftTimer;
+	Timer *autonTurnTimer;
+	Timer *autonDriveTimer;
 
 	//sensors
 	DigitalInput *liftLimitSwitch;
 
 	//ints, floats, and bools
 	int shiftValue;
+	int autonSwitch;
 	float leftStickValue;
 	float rightStickValue;
-	bool bikiniBottom;					//Lift is at the bottom
+	bool bikiniBottom;									//Lift is at the bottom
 
 
 	void RobotInit()
@@ -64,6 +68,9 @@ private:
 		//timers
 		lastShift = new Timer();
 		liftToBoxHeight = new Timer();
+		autonLiftTimer = new Timer();
+		autonTurnTimer = new Timer();
+		autonDriveTimer = new Timer();
 
 		//sensors
 		liftLimitSwitch = new DigitalInput(0);
@@ -122,6 +129,7 @@ private:
 			lastShift->Reset();
 		}
 	}
+
 	void Lift()
 	{
 		m_screw->Set(m_gamepad->GetZ());		//"Set" may be changed for CAN
@@ -147,6 +155,84 @@ private:
 			m_screw->Set(0.0);
 			liftToBoxHeight->Reset();
 			smart->PutString("Lift status", "At box height");
+		}
+	}
+
+	void Autonomous()
+	{
+		switch(autonSwitch)
+		{
+			case 0:
+				m_armClose->Set(true);
+				autonSwitch = 1;
+				break;
+
+			case 1:
+				autonLiftTimer->Start();
+				while(autonLiftTimer < 0.5)					//time is subject to change
+				{
+					m_screw->Set(0.7);
+				}
+				autonLiftTimer->Reset();
+				m_screw->Set(0.0);
+				autonSwitch = 2;
+				break;
+
+			case 2:
+				autonTurnTimer->Start();
+				while(autonTurnTimer < 0.5)					//time is subject to change
+				{
+					m_robotDrive->TankDrive(0.0 , 0.7);
+				}
+				autonTurnTimer->Reset();
+				m_robotDrive->TankDrive(0.0 , 0.0);
+				autonSwitch = ;
+				break;
+
+			case 3:											//robot goes over the step
+				autonDriveTimer->Start();
+				while(autonDriveTimer < 3.5)				//time is subject to change
+				{
+					m_robotDrive(0.7 , 0.7);
+				}
+				autonDriveTimer->Reset();
+				m_robotDrive(0 , 0);
+				autonSwitch = 5;
+				break;
+
+			case 4:											//robot stays off the step
+				autonDriveTimer->Start();
+				while(autonDriveTimer < 3.0)				//time is subject to change
+				{
+					m_robotDrive(0.7 , 0.7);
+				}
+				autonDriveTimer->Reset();
+				m_robotDrive(0 , 0);
+				autonSwitch = 5;
+				break;
+
+			case 5:
+				while(liftLimitSwitch->Get())
+				{
+					m_screw->Set(-0.7);
+				}
+				m_screw->Set(0.0);
+				autonSwitch = 6;
+				break;
+
+			case 6:
+				m_armOpen->Set(true);
+				autonSwitch = 7;
+				break;
+
+			case 7:
+				autonDriveTimer->Start();
+				while(autonDriveTimer < 0.4)
+				{
+					m_robotDrive->TankDrive(0.7 , 0.7);
+				}
+				autonDriveTimer->Reset();
+				m_robotDrive->TankDrive(0.0, 0.0);
 		}
 	}
 };
