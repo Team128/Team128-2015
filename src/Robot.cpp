@@ -25,6 +25,9 @@ private:
 		//shifter
 	Solenoid *m_shifterUp;
 	Solenoid *m_shifterDown;
+		//manipulator
+	Solenoid *m_armOpen;
+	Solenoid *m_armClose;
 
 	//timers
 	Timer *lastShift;
@@ -39,6 +42,7 @@ private:
 	//ints, floats, and bools
 	int shiftValue;
 	int autonSwitch;
+	int armValue;
 	float leftStickValue;
 	float rightStickValue;
 	bool bikiniBottom;									//Lift is at the bottom
@@ -61,6 +65,10 @@ private:
 		m_shifterUp = new Solenoid(0);
 		m_shifterDown = new Solenoid(0);
 		m_robotDrive = new RobotDrive(m_leftFront,m_rightFront,m_leftBack,m_rightBack);
+
+		//manipulator
+		m_armOpen = new Solenoid(0);
+		m_armClose = new Solenoid (0);
 
 		//lift
 		m_screw = new CANTalon(0);
@@ -90,6 +98,8 @@ private:
 	void TeleopInit()
 	{
 		shiftValue = 0;
+		armValue = 0;
+
 	}
 	void TeleopPeriodic()
 	{
@@ -155,6 +165,21 @@ private:
 			m_screw->Set(0.0);
 			liftToBoxHeight->Reset();
 			smart->PutString("Lift status", "At box height");
+		}
+	}
+	void Manipulator()
+	{
+		if(m_gamepad->GetRawButton(1) == 1 && armValue == 0)
+		{
+			m_armOpen->Set(true);
+			m_armClose->Set(false);
+			armValue = 1;
+		}
+		else if(m_gamepad->GetRawButton(1) == 1 && armValue == 1)
+		{
+			m_armOpen->Set(false);
+			m_armClose->Set(true);
+			armValue = 0;
 		}
 	}
 
